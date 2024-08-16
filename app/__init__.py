@@ -105,11 +105,8 @@ def create_app():
     """
 
     classification_system = ClassificationSystem()
-    result1 = classification_system.classify_ticket(ticket1)
-    result2 = classification_system.classify_ticket(ticket2)
-
-    print(result1.model_dump_json(indent=2))
-    print(result2.model_dump_json(indent=2))
+    print(classification_system.classify_ticket(ticket1))
+    print(classification_system.classify_ticket(ticket2))
 
     # scheduler = APScheduler()
     # scheduler.init_app(app)

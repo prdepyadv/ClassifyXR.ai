@@ -1,4 +1,5 @@
 import json
+from math import e
 import instructor
 import ollama
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
@@ -7,7 +8,6 @@ from typing import List, Dict, Any
 from openai import OpenAI
 import requests
 from ollama_instructor.ollama_instructor_client import OllamaInstructorClient
-
 
 class TicketCategory(str, Enum):
     ORDER_ISSUE = "order_issue"
@@ -80,77 +80,85 @@ class ClassificationSystem:
             - The 'suggested_action' should be a brief, actionable step for our support team.
             Analyze the following customer support ticket and provide the requested information in the specified format.
         """
+        self.os_primary_model = "llama3.1"
+        self.os_alternative_model = "mistral"
+        self.paid_model_name = "gpt-4o"
 
-    def classify_ticket(self, ticket_text: str) -> TicketClassification:
-        # response_content = {
-        #     "category": "order_issue",
-        #     "urgency": "high",
-        #     "sentiment": "angry",
-        #     "confidence": 0.9,
-        #     "key_information": ["order_number: 12345"],
-        #     "suggested_action": "Initiate an immediate investigation and resolution process to correct the order error."
-        # }
-        # try:
-        #     classification = TicketClassification.parse_obj(response_content)
-        #     return classification
-        # except ValidationError as e:
-        #     print("Validation error:", e)
-        #     raise
-    
+    def classify_ticket(self, ticket_text: str) -> str:
+        #return ticket_classification.model_dump_json(indent=2)
+            
         client = OllamaInstructorClient(debug=True)
-        response = client.chat_completion(
-            model="llama3.1",
-            pydantic_model=TicketClassification,
-            format='',
-            messages=[
-                {
-                    "role": "system",
-                    "content": self.system_prompt,
-                },
-                {
-                    "role": "user", 
-                    "content": ticket_text
-                },
-            ],
-            options={"temperature": 0},
-        )
-        return TicketClassification.parse_raw(response["message"]["content"])
+        try:
+            print(f"Processing data using model: {self.os_primary_model}\n\n")
+            response = client.chat_completion(
+                model=self.os_primary_model,
+                pydantic_model=TicketClassification,
+                format='json',
+                messages=[
+                    {
+                        "role": "assistant",
+                        "content": self.system_prompt,
+                    },
+                    {
+                        "role": "user", 
+                        "content": ticket_text
+                    },
+                ],
+                options={"temperature": 0},
+            )
+        except Exception as e:
+            print(f"\n\nError: {e}\nRetrying with alternative model: {self.os_alternative_model}\n")
+            response = client.chat_completion(
+                model=self.os_alternative_model,
+                pydantic_model=TicketClassification,
+                format='json',
+                messages=[
+                    {
+                        "role": "assistant",
+                        "content": self.system_prompt,
+                    },
+                    {
+                        "role": "user", 
+                        "content": ticket_text
+                    },
+                ],
+                options={"temperature": 0},
+            )
+            
+        return TicketClassification.model_validate_json(response["message"]["content"]).model_dump_json(indent=2)
 
+    # def classify_ticket(self, ticket_text: str) -> str:
+    #     response = ollama.chat(
+    #         model=self.model_name,
+    #         messages=[
+    #             {
+    #                 "role": "system",
+    #                 "content": self.system_prompt,
+    #             },
+    #             {"role": "user", "content": ticket_text},
+    #         ],
+    #         options={"temperature": 0},
+    #         stream=False,
+    #         format="json",
+    #     )
+    #     return TicketClassification.model_validate_json(response["message"]["content"]).model_dump_json(indent=2)
 
-'''
-    def classify_ticket_ollama_api(self, ticket_text: str) -> TicketClassification:
-        response = ollama.chat(
-            model="llama3.1",
-            messages=[
-                {
-                    "role": "system",
-                    "content": self.system_prompt,
-                },
-                {"role": "user", "content": ticket_text},
-            ],
-            options={"temperature": 0},
-            stream=False,
-            format="json",
-        )
-        return TicketClassification.from_api_response(response["message"]["content"])
-
-    def classify_ticket(self, ticket_text: str) -> TicketClassification:
-        client = instructor.patch(OpenAI())
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            response_model=TicketClassification,
-            temperature=0,
-            max_retries=3,
-            messages=[
-                {
-                    "role": "system",
-                    "content": self.system_prompt,
-                },
-                {
-                    "role": "user",
-                    "content": ticket_text
-                }
-            ]
-        )
-        return response
-'''
+    # def classify_ticket(self, ticket_text: str) -> str:
+    #     client = instructor.patch(OpenAI())
+    #     response = client.chat.completions.create(
+    #         model=self.paid_model_name,
+    #         response_model=TicketClassification,
+    #         temperature=0,
+    #         max_retries=3,
+    #         messages=[
+    #             {
+    #                 "role": "system",
+    #                 "content": self.system_prompt,
+    #             },
+    #             {
+    #                 "role": "user",
+    #                 "content": ticket_text
+    #             }
+    #         ]
+    #     )
+    #     return response.model_dump_json(indent=2)
