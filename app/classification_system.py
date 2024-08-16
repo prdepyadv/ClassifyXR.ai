@@ -1,7 +1,7 @@
 import json
 import instructor
 import ollama
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from enum import Enum
 from typing import List, Dict, Any
 from openai import OpenAI
@@ -45,30 +45,35 @@ class TicketClassification(BaseModel):
     suggested_action: str = Field(
         description="Brief suggestion for handling the ticket"
     )
+    model_config = ConfigDict(
+        extra='forbid'
+    )
 
-    @classmethod
-    def from_openai_response(cls, response_text: str) -> "TicketClassification":
-        response_dict = eval(response_text)
-        return cls(
-            category=TicketCategory(response_dict["category"]),
-            urgency=TicketUrgency(response_dict["urgency"]),
-            sentiment=CustomerSentiment(response_dict["sentiment"]),
-            confidence=response_dict["confidence"],
-            key_information=response_dict["key_information"],
-            suggested_action=response_dict["suggested_action"],
-        )
+    # @classmethod
+    # def from_openai_response(cls, response_text: str) -> "TicketClassification":
+    #     response_dict = eval(response_text)
+    #     print("response_dict", response_dict)
+    #     return cls(
+    #         category=TicketCategory(response_dict["category"]),
+    #         urgency=TicketUrgency(response_dict["urgency"]),
+    #         sentiment=CustomerSentiment(response_dict["sentiment"]),
+    #         confidence=response_dict["confidence"],
+    #         key_information=response_dict["key_information"],
+    #         suggested_action=response_dict["suggested_action"],
+    #     )
 
-    @classmethod
-    def from_api_response(cls, response_text: str) -> "TicketClassification":
-        response_dict = json.loads(response_text)
-        return cls(
-            category=TicketCategory(response_dict["category"]),
-            urgency=TicketUrgency(response_dict["urgency"]),
-            sentiment=CustomerSentiment(response_dict["sentiment"]),
-            confidence=response_dict["confidence"],
-            key_information=response_dict["key_information"],
-            suggested_action=response_dict["suggested_action"],
-        )
+    # @classmethod
+    # def from_api_response(cls, response_text: str) -> "TicketClassification":
+    #     response_dict = json.loads(response_text)
+    #     print("response_dict", response_dict)
+    #     return cls(
+    #         category=TicketCategory(response_dict["category"]),
+    #         urgency=TicketUrgency(response_dict["urgency"]),
+    #         sentiment=CustomerSentiment(response_dict["sentiment"]),
+    #         confidence=response_dict["confidence"],
+    #         key_information=response_dict["key_information"],
+    #         suggested_action=response_dict["suggested_action"],
+    #     )
 
 
 class ClassificationSystem:
@@ -111,23 +116,23 @@ class ClassificationSystem:
         )
         return response["message"]["content"]
 
-    def classify_ticket_ollama_api(self, ticket_text: str) -> TicketClassification:
-        response = ollama.chat(
-            model="llama3.1",
-            messages=[
-                {
-                    "role": "system",
-                    "content": self.system_prompt,
-                },
-                {"role": "user", "content": ticket_text},
-            ],
-            options={"temperature": 0},
-            stream=False,
-            format="json",
-        )
-        return TicketClassification.from_api_response(response["message"]["content"])
+    # def classify_ticket_ollama_api(self, ticket_text: str) -> TicketClassification:
+    #     response = ollama.chat(
+    #         model="llama3.1",
+    #         messages=[
+    #             {
+    #                 "role": "system",
+    #                 "content": self.system_prompt,
+    #             },
+    #             {"role": "user", "content": ticket_text},
+    #         ],
+    #         options={"temperature": 0},
+    #         stream=False,
+    #         format="json",
+    #     )
+    #     return TicketClassification.from_api_response(response["message"]["content"])
 
-    # def classify_ticket_openai(self, ticket_text: str) -> TicketClassification:
+    # def classify_ticket(self, ticket_text: str) -> TicketClassification:
     #     client = instructor.patch(OpenAI())
     #     response = client.chat.completions.create(
     #         model="gpt-4o",
@@ -139,7 +144,10 @@ class ClassificationSystem:
     #                 "role": "system",
     #                 "content": self.system_prompt,
     #             },
-    #             {"role": "user", "content": ticket_text}
+    #             {
+    #                 "role": "user",
+    #                 "content": ticket_text
+    #             }
     #         ]
     #     )
     #     return response
