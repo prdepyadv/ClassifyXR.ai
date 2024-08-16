@@ -46,31 +46,14 @@ class TicketClassification(BaseModel):
         description="Brief suggestion for handling the ticket"
     )
 
-    @classmethod
-    def from_openai_response(cls, response_text: str) -> "TicketClassification":
-        response_dict = eval(response_text)
-        print("response_dict", response_dict)
-        return cls(
-            category=TicketCategory(response_dict["category"]),
-            urgency=TicketUrgency(response_dict["urgency"]),
-            sentiment=CustomerSentiment(response_dict["sentiment"]),
-            confidence=response_dict["confidence"],
-            key_information=response_dict["key_information"],
-            suggested_action=response_dict["suggested_action"],
-        )
-
-    @classmethod
-    def from_api_response(cls, response_text: str) -> "TicketClassification":
-        response_dict = json.loads(response_text)
-        print("response_dict", response_dict)
-        return cls(
-            category=TicketCategory(response_dict["category"]),
-            urgency=TicketUrgency(response_dict["urgency"]),
-            sentiment=CustomerSentiment(response_dict["sentiment"]),
-            confidence=response_dict["confidence"],
-            key_information=response_dict["key_information"],
-            suggested_action=response_dict["suggested_action"],
-         )
+ticket_classification = TicketClassification(
+    category=TicketCategory.ORDER_ISSUE,
+    urgency=TicketUrgency.HIGH,
+    sentiment=CustomerSentiment.ANGRY,
+    confidence=0.9,
+    key_information=["Order #12345", "Received tablet instead of laptop"],
+    suggested_action="Contact customer to arrange laptop delivery"
+)
 
 class ClassificationSystem:
     def __init__(self):
@@ -99,6 +82,21 @@ class ClassificationSystem:
         """
 
     def classify_ticket(self, ticket_text: str) -> TicketClassification:
+        # response_content = {
+        #     "category": "order_issue",
+        #     "urgency": "high",
+        #     "sentiment": "angry",
+        #     "confidence": 0.9,
+        #     "key_information": ["order_number: 12345"],
+        #     "suggested_action": "Initiate an immediate investigation and resolution process to correct the order error."
+        # }
+        # try:
+        #     classification = TicketClassification.parse_obj(response_content)
+        #     return classification
+        # except ValidationError as e:
+        #     print("Validation error:", e)
+        #     raise
+    
         client = OllamaInstructorClient(debug=True)
         response = client.chat_completion(
             model="llama3.1",
@@ -109,28 +107,14 @@ class ClassificationSystem:
                     "role": "system",
                     "content": self.system_prompt,
                 },
-                {"role": "user", "content": ticket_text},
+                {
+                    "role": "user", 
+                    "content": ticket_text
+                },
             ],
             options={"temperature": 0},
         )
-        response_content = response["message"]["content"]
-
-        # response_content = {
-        #     "category": "order_issue",
-        #     "urgency": "high",
-        #     "sentiment": "angry",
-        #     "confidence": 0.9,
-        #     "key_information": [{"order_number": "12345"}],
-        #     "suggested_action": "Initiate an immediate investigation and resolution process to correct the order error."
-        # }
-        print("Raw response content:", response_content)
-        
-        try:
-            classification = TicketClassification.parse_raw(response_content)
-            return classification
-        except ValidationError as e:
-            print("Validation error:", e)
-            raise
+        return TicketClassification.parse_raw(response["message"]["content"])
 
 
 '''
