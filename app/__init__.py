@@ -7,6 +7,7 @@ from app.commands import define_tasks
 import logging
 import threading
 
+
 class SingletonMeta(ABCMeta):
     _instances = {}
     _lock = threading.Lock()
@@ -16,6 +17,7 @@ class SingletonMeta(ABCMeta):
             if cls not in cls._instances:
                 cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
+
 
 class BaseLogger(ABC, metaclass=SingletonMeta):
     @abstractmethod
@@ -37,6 +39,7 @@ class BaseLogger(ABC, metaclass=SingletonMeta):
     @abstractmethod
     def critical(self, message):
         pass
+
 
 class Logger(BaseLogger):
     _logger = None
@@ -82,6 +85,7 @@ class Logger(BaseLogger):
     def critical(self, message):
         if self._logger is not None:
             self._logger.critical(message)
+
 
 def create_app():
     app = Flask(__name__)
