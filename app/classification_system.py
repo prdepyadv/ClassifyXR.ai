@@ -86,7 +86,7 @@ class ClassificationSystem:
         self.os_alternative_model_2 = "gemma:7b-instruct"
         self.paid_model_name = "gpt-4o"
 
-    def classify_ticket(self, ticket_text: str) -> str:
+    def classify(self, ticket_text: str) -> str:
         client = OllamaInstructorClient()
         try:
             print(f"Processing data using model: {self.os_primary_model}\n\n")
@@ -128,7 +128,7 @@ class ClassificationSystem:
         return TicketClassification.parse_obj(response["message"]["content"]).model_dump_json(indent=2)
 
     '''
-    def classify_ticket_ollama_api(self, ticket_text: str) -> str:
+    def classify_using_ollama_api(self, ticket_text: str) -> str:
         response = ollama.chat(
             model=self.model_name,
             messages=[
@@ -144,7 +144,7 @@ class ClassificationSystem:
         )
         return TicketClassification.model_validate_json(response["message"]["content"]).model_dump_json(indent=2)
 
-    def classify_ticket_openai(self, ticket_text: str) -> str:
+    def classify_using_openai(self, ticket_text: str) -> str:
         client = instructor.patch(OpenAI())
         response = client.chat.completions.create(
             model=self.paid_model_name,

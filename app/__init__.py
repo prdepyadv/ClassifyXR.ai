@@ -105,7 +105,7 @@ def create_app():
     """
 
     classification_system = ClassificationSystem()
-    print(classification_system.classify_ticket(ticket1))
-    print(classification_system.classify_ticket(ticket2))
+    print(classification_system.classify(ticket1))
+    print(classification_system.classify(ticket2))
 
     return app
