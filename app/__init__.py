@@ -108,9 +108,4 @@ def create_app():
     print(classification_system.classify_ticket(ticket1))
     print(classification_system.classify_ticket(ticket2))
 
-    # scheduler = APScheduler()
-    # scheduler.init_app(app)
-    # define_tasks(scheduler=scheduler, app=app)
-    # scheduler.start()
-
     return app
