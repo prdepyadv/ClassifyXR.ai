@@ -137,20 +137,20 @@ class ClassificationSystem:
         """
         self.os_primary_models = ["llama3.1", "mistral", "gemma:7b-instruct"]
         self.paid_model_name = "gpt-4o"
-        self.os_client = OllamaInstructorClient()
 
     def process_ticket(self, ticket_text: str, model_name: str) -> Mapping[str, Any]:
         if model_name not in self.os_primary_models:
             raise ValueError(f"Invalid model name: {model_name}")
 
         print(f"Processing data using model: {model_name}")
-        return self.os_client.chat_completion(
+        os_client = OllamaInstructorClient()
+        return os_client.chat_completion(
             model=model_name,
             pydantic_model=TicketClassification,
             format="json",
             messages=[
                 {
-                    "role": "system",
+                    "role": "assistant",
                     "content": self.system_prompt,
                 },
                 {"role": "user", "content": ticket_text},
