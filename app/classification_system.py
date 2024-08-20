@@ -144,7 +144,7 @@ class ClassificationSystem:
             try:
                 response = self.process_ticket(ticket_text, model)
                 
-                classification = TicketClassification.parse_obj(response["message"]["content"])
+                classification = TicketClassification.model_validate(response["message"]["content"])
                 if classification.confidence and classification.confidence > highest_confidence:
                     highest_confidence = classification.confidence
                     best_response = response["message"]["content"]
