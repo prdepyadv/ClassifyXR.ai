@@ -46,6 +46,21 @@ class TicketClassification(BaseModel):
         description="Brief suggestion for handling the ticket"
     )
 
+    model_config = ConfigDict(
+        json_schema_extra={
+            'examples': [
+                {
+                    'category':'account_access',
+                    'urgency': 'high',
+                    'sentiment': 'frustrated',
+                    'confidence': 0.9,
+                    'key_information': ['pending orders', 'password reset issue'],
+                    'suggested_action': 'Escalate to a senior support agent for further assistance with account access and pending order resolution.'
+                }
+            ]
+        }
+    )
+
 ticket_classification = TicketClassification(
     category=TicketCategory.ORDER_ISSUE,
     urgency=TicketUrgency.HIGH,
@@ -54,6 +69,7 @@ ticket_classification = TicketClassification(
     key_information=["Order #12345", "Received tablet instead of laptop"],
     suggested_action="Contact customer to arrange laptop delivery"
 )
+
 
 class ClassificationSystem:
     def __init__(self):
