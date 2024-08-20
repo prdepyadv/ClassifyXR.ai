@@ -104,7 +104,7 @@ class ClassificationSystem:
                         "content": ticket_text
                     },
                 ],
-                options={"temperature": 0},
+                options={"temperature": 0.25},
             )
         except Exception as e:
             print(f"\n\nError: {e}\nRetrying with alternative model: {self.os_alternative_model}\n")
@@ -122,7 +122,7 @@ class ClassificationSystem:
                         "content": ticket_text
                     },
                 ],
-                options={"temperature": 0},
+                options={"temperature": 0.25},
             )
             
         return TicketClassification.parse_obj(response["message"]["content"]).model_dump_json(indent=2)
