@@ -112,7 +112,7 @@ class ClassificationSystem:
                 format='json',
                 messages=[
                     {
-                        "role": "assistant",
+                        "role": "system",
                         "content": self.system_prompt,
                     },
                     {
@@ -130,7 +130,7 @@ class ClassificationSystem:
                 format='json',
                 messages=[
                     {
-                        "role": "assistant",
+                        "role": "system",
                         "content": self.system_prompt,
                     },
                     {
