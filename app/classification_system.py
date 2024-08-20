@@ -9,6 +9,11 @@ from openai import OpenAI
 import requests
 from ollama_instructor.ollama_instructor_client import OllamaInstructorClient
 
+'''
+Todo: 
+1. Add concept to choose the best response based on the confidence score returned by the different models.
+2. We can add concept to check if ticket is fraud or not based on the other user PII data like IP, Country, etc.
+'''
 
 class TicketCategory(str, Enum):
     ORDER_ISSUE = "order_issue"
