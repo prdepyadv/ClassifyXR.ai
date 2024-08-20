@@ -1,10 +1,11 @@
 import json
 from math import e
+from multiprocessing import process
 import instructor
 import ollama
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
 from enum import Enum
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Mapping
 from openai import OpenAI
 import requests
 from ollama_instructor.ollama_instructor_client import OllamaInstructorClient
@@ -109,49 +110,16 @@ class ClassificationSystem:
         self.os_alternative_model_2 = "gemma:7b-instruct"
         self.paid_model_name = "gpt-4o"
 
-    def classify(self, ticket_text: str) -> str:
+    def process_ticket(self, ticket_text: str, model_name: str) -> Mapping[str, Any]:
+        if model_name not in [self.os_primary_model, self.os_alternative_model, self.os_alternative_model_2]:
+            raise ValueError(f"Invalid model name: {model_name}")
+
+        print(f"Processing data using model: {model_name}")
         client = OllamaInstructorClient()
-        try:
-            print(f"Processing data using model: {self.os_primary_model}\n\n")
-            response = client.chat_completion(
-                model=self.os_primary_model,
-                pydantic_model=TicketClassification,
-                format="json",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": self.system_prompt,
-                    },
-                    {"role": "user", "content": ticket_text},
-                ],
-                options={"temperature": 0.25},
-            )
-        except Exception as e:
-            print(
-                f"\n\nError: {e}\nRetrying with alternative model: {self.os_alternative_model}\n"
-            )
-            response = client.chat_completion(
-                model=self.os_alternative_model,
-                pydantic_model=TicketClassification,
-                format="json",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": self.system_prompt,
-                    },
-                    {"role": "user", "content": ticket_text},
-                ],
-                options={"temperature": 0.25},
-            )
-
-        return TicketClassification.parse_obj(
-            response["message"]["content"]
-        ).model_dump_json(indent=2)
-
-    """
-    def classify_using_ollama_api(self, ticket_text: str) -> str:
-        response = ollama.chat(
-            model=self.model_name,
+        return client.chat_completion(
+            model=model_name,
+            pydantic_model=TicketClassification,
+            format="json",
             messages=[
                 {
                     "role": "system",
@@ -159,12 +127,42 @@ class ClassificationSystem:
                 },
                 {"role": "user", "content": ticket_text},
             ],
-            options={"temperature": 0},
-            stream=False,
-            format="json",
+            options={"temperature": 0.25},
         )
-        return TicketClassification.model_validate_json(response["message"]["content"]).model_dump_json(indent=2)
+    
+    def classify(self, ticket_text: str) -> dict:
+        models = [
+            self.os_primary_model,
+            self.os_alternative_model,
+            self.os_alternative_model_2,
+        ]
+        best_response = None
+        highest_confidence = 0.0
+        model_used = None
 
+        for model in models:
+            try:
+                response = self.process_ticket(ticket_text, model)
+                
+                classification = TicketClassification.parse_obj(response["message"]["content"])
+                if classification.confidence and classification.confidence > highest_confidence:
+                    highest_confidence = classification.confidence
+                    best_response = response["message"]["content"]
+                    model_used = model
+                
+            except Exception as e:
+                print(f"\n\nError with model {model}: {e}\nContinuing with the next model.\n")
+        
+        if not best_response:
+            raise ValueError("All models failed to classify the ticket.")
+            
+        return { 
+            "model": model_used,
+            "ticket": best_response
+        }
+            
+    
+    """
     def classify_using_openai(self, ticket_text: str) -> str:
         client = instructor.patch(OpenAI())
         response = client.chat.completions.create(

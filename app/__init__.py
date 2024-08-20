@@ -1,6 +1,7 @@
 from abc import ABC, ABCMeta, abstractmethod
+import json
 from logging.handlers import RotatingFileHandler
-from flask import Flask
+from flask import Flask, jsonify, request
 from flask_apscheduler import APScheduler
 from app.classification_system import ClassificationSystem
 from app.commands import define_tasks
@@ -94,18 +95,32 @@ def create_app():
     logger = Logger()
     logger.info("Application created.")
 
-    ticket1 = """
-    I ordered a laptop from your store last week (Order #12345), but I received a tablet instead. 
-    This is unacceptable! I need the laptop for work urgently. Please resolve this immediately or I'll have to dispute the charge.
-    """
-
-    ticket2 = """
-    Hello, I'm having trouble logging into my account. I've tried resetting my password, but I'm not receiving the reset email. 
-    Can you please help me regain access to my account? I've been a loyal customer for years and have several pending orders.
-    """
-
     classification_system = ClassificationSystem()
-    print(classification_system.classify(ticket1))
-    print(classification_system.classify(ticket2))
+
+    @app.route('/classify/ticket', methods = ['POST']) 
+    def classify_ticket():
+        data = request.get_json()
+        if not data or 'message' not in data:
+            return jsonify({"error": True, "message": "Invalid request, 'message' field is missing"}), 400
+
+        example_ticket = """
+        I need to cancel my subscription, but the website doesn't allow me to do so. I've tried multiple times,
+        but I keep getting error messages. Can someone assist me with this cancellation?
+        """
+
+        example_ticket = """
+        Our team has noticed that the website has been extremely slow recently.
+        The page load time has increased from 1.5 seconds to almost 6 seconds, which is unacceptable.
+        This slowdown has led to a 25% drop in our daily transactions. Can you please look into this urgently?
+        """
+
+        ticket = data['message']
+        try:
+            classification = classification_system.classify(ticket)
+        except Exception as e:
+            logger.error(f"Error classifying ticket: {e}")
+            return jsonify({"error": True, "message": "Error classifying ticket"}), 500
+
+        return jsonify({ "error": False, "data": classification})
 
     return app
