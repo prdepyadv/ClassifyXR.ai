@@ -9,6 +9,7 @@ from openai import OpenAI
 import requests
 from ollama_instructor.ollama_instructor_client import OllamaInstructorClient
 
+
 class TicketCategory(str, Enum):
     ORDER_ISSUE = "order_issue"
     ACCOUNT_ACCESS = "account_access"
@@ -48,18 +49,19 @@ class TicketClassification(BaseModel):
 
     model_config = ConfigDict(
         json_schema_extra={
-            'examples': [
+            "examples": [
                 {
-                    'category':'account_access',
-                    'urgency': 'high',
-                    'sentiment': 'frustrated',
-                    'confidence': 0.9,
-                    'key_information': ['pending orders', 'password reset issue'],
-                    'suggested_action': 'Escalate to a senior support agent for further assistance with account access and pending order resolution.'
+                    "category": "account_access",
+                    "urgency": "high",
+                    "sentiment": "frustrated",
+                    "confidence": 0.9,
+                    "key_information": ["pending orders", "password reset issue"],
+                    "suggested_action": "Escalate to a senior support agent for further assistance with account access and pending order resolution.",
                 }
             ]
         }
     )
+
 
 ticket_classification = TicketClassification(
     category=TicketCategory.ORDER_ISSUE,
@@ -67,7 +69,7 @@ ticket_classification = TicketClassification(
     sentiment=CustomerSentiment.ANGRY,
     confidence=0.9,
     key_information=["Order #12345", "Received tablet instead of laptop"],
-    suggested_action="Contact customer to arrange laptop delivery"
+    suggested_action="Contact customer to arrange laptop delivery",
 )
 
 
@@ -109,41 +111,39 @@ class ClassificationSystem:
             response = client.chat_completion(
                 model=self.os_primary_model,
                 pydantic_model=TicketClassification,
-                format='json',
+                format="json",
                 messages=[
                     {
                         "role": "system",
                         "content": self.system_prompt,
                     },
-                    {
-                        "role": "user", 
-                        "content": ticket_text
-                    },
+                    {"role": "user", "content": ticket_text},
                 ],
                 options={"temperature": 0.25},
             )
         except Exception as e:
-            print(f"\n\nError: {e}\nRetrying with alternative model: {self.os_alternative_model}\n")
+            print(
+                f"\n\nError: {e}\nRetrying with alternative model: {self.os_alternative_model}\n"
+            )
             response = client.chat_completion(
                 model=self.os_alternative_model,
                 pydantic_model=TicketClassification,
-                format='json',
+                format="json",
                 messages=[
                     {
                         "role": "system",
                         "content": self.system_prompt,
                     },
-                    {
-                        "role": "user", 
-                        "content": ticket_text
-                    },
+                    {"role": "user", "content": ticket_text},
                 ],
                 options={"temperature": 0.25},
             )
-            
-        return TicketClassification.parse_obj(response["message"]["content"]).model_dump_json(indent=2)
 
-    '''
+        return TicketClassification.parse_obj(
+            response["message"]["content"]
+        ).model_dump_json(indent=2)
+
+    """
     def classify_using_ollama_api(self, ticket_text: str) -> str:
         response = ollama.chat(
             model=self.model_name,
@@ -179,4 +179,4 @@ class ClassificationSystem:
             ]
         )
         return response.model_dump_json(indent=2)
-    '''
+    """
