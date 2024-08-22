@@ -268,11 +268,13 @@ class ClassificationSystem:
 
         response_prompt = f"""
         You have classified the following customer support ticket:
+        Ticket Text: {ticket_text}
         Ticket Details: {json.dumps(ticket_classification['classification'])}
         
         Based on this information, please generate a polite and helpful response to the customer, addressing their concerns and providing the information they have requested.
         """
-            
+    
+        print(f"Response Prompt: {response_prompt}")
         os_client = OllamaInstructorClient()
         customer_response = os_client.chat_completion(
             model=self.os_primary_model,
