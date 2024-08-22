@@ -97,11 +97,19 @@ def create_app():
 
     classification_system = ClassificationSystem()
 
-    @app.route('/classify/ticket', methods = ['POST']) 
+    @app.route("/classify/ticket", methods=["POST"])
     def classify_ticket():
         data = request.get_json()
-        if not data or 'message' not in data:
-            return jsonify({"error": True, "message": "Invalid request, 'message' field is missing"}), 400
+        if not data or "message" not in data:
+            return (
+                jsonify(
+                    {
+                        "error": True,
+                        "message": "Invalid request, 'message' field is missing",
+                    }
+                ),
+                400,
+            )
 
         example_ticket = """
         I need to cancel my subscription, but the website doesn't allow me to do so. I've tried multiple times,
@@ -114,14 +122,14 @@ def create_app():
         This slowdown has led to a 25% drop in our daily transactions. Can you please look into this urgently?
         """
 
-        ticket = data['message']
+        ticket = data["message"]
         try:
-            #classification = classification_system.classify(ticket)
+            # classification = classification_system.classify(ticket)
             classification = classification_system.classify_and_response(ticket)
         except Exception as e:
             logger.error(f"Error classifying ticket: {e}")
             return jsonify({"error": True, "message": "Error classifying ticket"}), 500
 
-        return jsonify({ "error": False, "data": classification})
+        return jsonify({"error": False, "data": classification})
 
     return app
