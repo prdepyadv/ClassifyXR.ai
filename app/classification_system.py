@@ -376,9 +376,7 @@ class ClassificationSystem:
         if not best_response:
             raise ValueError("All models failed to generate a response.")
 
-        ticket_classification["response"] = best_response["message"]["content"][
-            "suggested_response"
-        ]
+        ticket_classification["response"] = best_response["suggested_response"]
         ticket_classification["response_model"] = model_used
 
         return ticket_classification
