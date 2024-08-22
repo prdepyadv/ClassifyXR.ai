@@ -116,7 +116,8 @@ def create_app():
 
         ticket = data['message']
         try:
-            classification = classification_system.classify(ticket)
+            #classification = classification_system.classify(ticket)
+            classification = classification_system.classify_and_response(ticket)
         except Exception as e:
             logger.error(f"Error classifying ticket: {e}")
             return jsonify({"error": True, "message": "Error classifying ticket"}), 500
