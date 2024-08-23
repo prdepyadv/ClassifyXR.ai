@@ -137,7 +137,7 @@ class TicketClassification(BaseModel):
     )
     priority: TicketPriority = Field(
         description="""
-            Priority level for handling the ticket based on impact and severity
+            Priority level for handling the ticket based on customer sentiment, impact and severity.
             For example:
             - **high**: Issues that cause a complete service outage or a severe degradation impacting critical business operations. There is no workaround, and the problem requires immediate attention,
             - **medium**: Issues that significantly impact functionality or performance but have a workaround available. These are important problems that need to be resolved quickly to avoid further escalation,
@@ -195,10 +195,19 @@ class TicketResponse(BaseModel):
 
 class ClassificationSystem:
     def __init__(self):
-        self.os_models = ["llama3.1", "mistral", "gemma:7b-instruct"]
-        self.os_primary_model = "llama3.1"
         self.assistant_name = "Alex"
         self.assistant_title = "Customer Support"
+        self.business_context = f"""
+            You are an AI assistant with name {self.assistant_name} and your title is {self.assistant_title} for a large e-commerce platform's customer support team.
+            Your role is to analyze incoming customer support tickets and provide structured information to help our team respond quickly and effectively.
+            
+            Business Context:
+            - We handle thousands of tickets daily across various categories (orders, accounts, products, technical issues, sales, feedback, billing).
+            - Quick and accurate classification and response is crucial for customer satisfaction and operational efficiency.
+        """
+        self.os_models = ["llama3.1", "mistral", "gemma:7b-instruct"]
+        self.os_primary_model = "llama3.1"
+        
 
     def process_ticket(
         self,
@@ -226,25 +235,21 @@ class ClassificationSystem:
             options={"temperature": 0.25},
         )
 
+
+
     def classify(self, ticket_text: str) -> dict:
         best_response = None
         highest_confidence = 0.0
         model_used = None
         ticket_classification_prompt = f"""
-            You are an AI assistant {self.assistant_name} and the title {self.assistant_title}  for a large e-commerce platform's customer support team.
-            Your role is to analyze incoming customer support tickets and provide structured information to help our team respond quickly and effectively
-            
-            Business Context:
-            - We handle thousands of tickets daily across various categories (orders, accounts, products, technical issues, sales, feedback, billing).
-            - Quick and accurate classification is crucial for customer satisfaction and operational efficiency.
-            - We prioritize based on urgency and customer sentiment.
+            {self.business_context}
             
             Your tasks:
             1. Categorize the ticket into the most appropriate category.
             2. Determine the customer's sentiment.
             3. Evaluate the impact on the business (low, medium, high).
             4. Specify the severity of the issue (low, medium, high, critical).
-            5. Assign a priority level for handling the ticket (low, medium, high) based on the result of the combination of Impact and Severity.
+            5. Assign a priority level for handling the ticket (low, medium, high) based on the result of the combination of customer sentiment, impact and severity.
             6. Extract key information that would be helpful for our support team, including specific customer requests (e.g., requested information like delivery dates, order status updates).
             7. Identify and emphasize any specific requests made by the customer (e.g., asking for a delivery date, requesting a refund) and list them separately under 'specific_requests'.
             8. Suggest an initial action for handling the ticket, making sure to address any specific requests made by the customer.
@@ -255,6 +260,8 @@ class ClassificationSystem:
             - If you're unsure about any aspect, reflect that in your confidence score.
             - For 'key_information', extract specific details like order numbers, product names, or account issues.
             - The 'suggested_action' should be a brief, actionable step for our support team.
+            - We prioritize ticket based on customer sentiment, impact and severity.
+
             Analyze the following customer support ticket and provide the requested information in the specified format while adhering to the following JSON schema: {TicketClassification.model_json_schema()}.
         """
 
@@ -291,6 +298,8 @@ class ClassificationSystem:
 
         return {"classification_model": model_used, "classification": best_response}
 
+
+
     def classify_and_response(self, ticket_text: str) -> dict:
         ticket_classification = self.classify(ticket_text)
 
@@ -315,19 +324,16 @@ class ClassificationSystem:
         # Previous communication history can be fetched from the database or CRM
         previous_communication_history = []
         ticket_response_prompt = f"""
-            You are an AI assistant {self.assistant_name} and the title {self.assistant_title} for a large e-commerce platform's customer support team.
-            Your role is to analyze incoming customer support tickets and provide structured information to help our team respond quickly and effectively
-            
-            Business Context:
-            - We handle thousands of tickets daily across various categories (orders, accounts, products, technical issues, sales, feedback, billing).
-
-            You already have classified the following customer support ticket:
-            Ticket Text: {ticket_text}
-            Ticket Details: {json.dumps(ticket_classification['classification'])}
+            {self.business_context}
 
             Contextual Information:
-            - Customer insights such as demography, location, and preferences if any {json.dumps(customer_insights)}.
-            - Use previous communication history stored to tailor the response if any {json.dumps(previous_communication_history)}.
+            - You already have classified the following customer support ticket:
+                Ticket Text: {ticket_text}
+                Ticket Details: {json.dumps(ticket_classification['classification'])}
+            - Customer insights such as demography, location, and preferences if any:
+                Customer Insights: {json.dumps(customer_insights)}
+            - Use previous communication history stored to tailor the response if any:
+                Previous Communication History: {json.dumps(previous_communication_history)}
             
             Instructions:
             - Please generate a polite, empathetic, and helpful response to the customer, addressing their concerns.
@@ -335,11 +341,9 @@ class ClassificationSystem:
             - If you need to mention next steps or an investigation, do so cautiously without assuming actions not confirmed in the input data.
             - Offer a clear resolution or next steps to the customer based on the information provided.
             - Provide a confidence score for your response.
+            - Please end the response with a polite sign-off, such as "Best regards" or "Thank you for your patience" with your name and your title.
 
-            Please end the response with a polite sign-off, such as "Best regards," or "Thank you for your patience."
-
-            Based on this information, please generate a polite and helpful response to the customer, addressing their concerns and providing the information they have requested,
-            while adhering to the following JSON schema: {TicketResponse.model_json_schema()}.
+            Based on this information, please generate a polite and helpful response to the customer, addressing their concerns and providing the information they have requested, while adhering to the following JSON schema: {TicketResponse.model_json_schema()}.
         """
         best_response = None
         highest_confidence = 0.0
