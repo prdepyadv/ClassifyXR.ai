@@ -7,6 +7,7 @@
         "pydantic",
         "templatized",
         "vectordb",
-        "vectorstore"
+        "vectorstore",
+        "venv"
     ]
 }
