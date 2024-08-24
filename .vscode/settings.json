@@ -1,8 +1,12 @@
 {
     "cSpell.words": [
+        "FAISS",
+        "langchain",
         "ollama",
         "openai",
         "pydantic",
-        "templatized"
+        "templatized",
+        "vectordb",
+        "vectorstore"
     ]
 }
