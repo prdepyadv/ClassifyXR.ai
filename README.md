@@ -1,4 +1,4 @@
-# Customer Support Ticket Classification and Response System (classify_sys.ai)
+# Customer Support Ticket Classification and Response System (ClassifyXR.ai)
 
 ## Overview
 
@@ -38,7 +38,7 @@ Follow these steps to set up the project environment and install dependencies:
 1. **Clone the Repository**:
 
     ```bash
-   git clone https://github.com/prdepyadv/classify_sys.ai.git
+   git clone https://github.com/prdepyadv/classifyxr.ai.git
    ```
 
 2. **Navigate to the Project Directory**:

@@ -25,7 +25,7 @@ Reduce in ticket volume by upto 85%
 Improvement in First call response FCR by upto 20% 
 
 ## Advanced email understanding
-#  Powered by LLMs, Yellow.ai Email Automation comprehends complex mail written in everyday language
+#  Powered by LLMs, This Email Automation comprehends complex mail written in everyday language
 1. Create email classification system that understands long, unstructured mails
 2. Identifies multiple intents in the email & ticket (intent and action items), recognizes urgency and user sentiment.
 
