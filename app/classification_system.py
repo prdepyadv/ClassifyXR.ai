@@ -17,41 +17,41 @@ import tempfile
 
 """
 Todo:
-Email Automation feature is a game-changer for businesses looking to streamline their support operations on email.
-Leveraging LLMs to identify multiple intents, generating responses and even escalate to the right teams is a technological breakthrough.
-Automate upto 80% of incoming email queries to drive quick, empathetic resolutions while reducing operational costs.
-Reduce support operations op-ex costs by upto 60%
-Reduce in ticket volume by upto 85%
-Improvement in First call response FCR by upto 20% 
+Implementing an Email Automation feature to revolutionize email-based support operations.
+- Utilize LLMs to detect multiple intents, generate responses, and manage escalations seamlessly.
+- Automate up to 80% of incoming email queries, enhancing speed and empathy in responses while cutting down operational costs.
+- Achieve up to a 60% reduction in operational expenditure for support operations.
+- Decrease ticket volume by up to 85%.
+- Improve First Call Resolution (FCR) rates by up to 20%.
 
-## Advanced email understanding
-#  Powered by LLMs, This Email Automation comprehends complex mail written in everyday language
-1. Create email classification system that understands long, unstructured mails
-2. Identifies multiple intents in the email & ticket (intent and action items), recognizes urgency and user sentiment.
+##Advanced Email Understanding
+# Deploy LLMs to interpret complex, naturally written emails.
+Develop a system that classifies long, unstructured emails effectively.
+Detects multiple intents within emails and tickets, identifying urgency and customer sentiment.
 
-## Automated workflow triggering
-#  Execute relevant downstream workflows automatically based on email intent identified
-3. Refer knowledge base for relevant resolutions
-4. Escalate to the right team
-5. Transfer to agent for complex use cases
+##Automated Workflow Triggering
+# Automatically initiate appropriate workflows based on identified email intents.
+Leverage the knowledge base for accurate resolution suggestions.
+Direct issues to the correct team when necessary.
+Transfer complex cases to a human agent when needed.
 
-## Empathetic, personalized resolutions
-#  Go beyond templatized resolutions and give your customers a truly human self-serve experience
-6. Cross-refer user details with CRM for contextual resolutions.
-7. Identify user sentiment for customized responses.
-8. Ensure adherence to company content guidelines while replying.
+##Empathetic, Personalized Resolutions
+# Move beyond generic responses to deliver truly personalized customer experiences.
+Cross-reference CRM data to provide contextually relevant resolutions.
+Tailor responses based on detected customer sentiment.
+Ensure responses align with company guidelines.
 
-## AI-powered agent assist
-#  Seamless transfer to human agent depending on customer query
-9. AI-powered response suggestions to human agent
-10. Automated trigger for agent transfer when negative user sentiment detected
-11. Human agent looped in as a fallback for specific complex queries
+##AI-Powered Agent Assistance
+# Enable seamless transitions to human agents based on the complexity of customer queries.
+Provide AI-driven response suggestions to human agents.
+Automatically transfer cases to agents when negative sentiment is detected.
+Engage human agents as a fallback for complex issues.
 
-## Connect with existing systems
-#  Provide resolutions based on customer insights like demography, location, preferences, and more
-12. Seamless integration with underlying systems, including existing ticketing systems and CRM tools
-13. Conversations over mail between customers and the email bot recorded in the CRM for reference
-14. Access the previous mail history stored in CRM to deliver contextual responses based on past interactions
+##System Integration
+# Offer solutions informed by customer insights, such as demographics, location, and preferences.
+Ensure smooth integration with existing systems, including ticketing and CRM tools.
+Record email interactions between customers and the email bot in the CRM for future reference.
+Access past email interactions stored in the CRM to provide contextually informed responses.
 """
 
 """
